@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseMarketChangeLogger  implements MarketChangeLogger {
     @Override
+    // TODO: Log changes to a database for persistency of logs
     public void log(String message, MarketOperation marketOperation) {
 
     }
-    // TODO: Log changes to a database for persistency of logs
 }

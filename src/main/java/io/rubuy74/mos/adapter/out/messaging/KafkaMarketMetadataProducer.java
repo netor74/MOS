@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaMarketMetadataProducer implements MarketChangePublisher {
     @Override
-    public void publish(MarketOperation marketOperation) {
+    // TODO: create audit logs for sucess of operations
+    public void publish(String message,MarketOperation marketOperation) {
 
     }
-    // TODO: create audit logs for sucess of operations (and maybe event listing??)
 }

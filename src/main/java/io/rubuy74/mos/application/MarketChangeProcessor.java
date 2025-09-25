@@ -38,6 +38,17 @@ public class MarketChangeProcessor implements MarketChangeHandler {
         return new Market(marketId,marketName,marketSelections);
     }
 
+    private void logChanges(String message, MarketOperation marketOperation) {
+        marketChangeLogger.log(
+                message,
+                marketOperation
+        );
+        marketChangePublisher.publish(
+                message,
+                marketOperation
+        );
+    }
+
     @Override
     @Transactional
     public void handle(MarketOperation marketOperation) {
@@ -54,17 +65,16 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         event.markets.add(newMarket);
                         eventService.updateEvent(event);
 
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[SUCCESS] - Added market to event %s",event.id),
                                 marketOperation
                         );
 
                     } else {
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[FAILED] - Market %s already exists",marketId),
-                                marketOperation);
+                                marketOperation
+                        );
                         return;
                     }
                 } else {
@@ -73,10 +83,10 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                     Market newMarket = createMarket(marketOperation);
                     event.markets.add(newMarket);
 
-                    // TODO: send message to topic
-                    marketChangeLogger.log(
+                    logChanges(
                             String.format("[SUCCESS] - Created new event %s with market %s", event.id, newMarket.id),
-                            marketOperation);
+                            marketOperation
+                    );
 
                     eventService.createEvent(event);
                 }
@@ -91,22 +101,19 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         event.markets.add(newMarket);
                         eventService.updateEvent(event);
 
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[SUCCESS] - Updated market %s on event %s",newMarket.id,event.id),
                                 marketOperation
                         );
                     } else {
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[FAILED] - Market %s does not exist",marketId),
                                 marketOperation
                         );
                     }
                 } else {
                     String eventId = marketOperation.marketRequest.eventDTO.id;
-                    // TODO: send message to topic
-                    marketChangeLogger.log(
+                    logChanges(
                             String.format("[FAILED] - Event %s does not exist",eventId),
                             marketOperation
                     );
@@ -122,22 +129,19 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         event.markets.remove(market);
                         eventService.updateEvent(event);
 
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[SUCCESS] - Market %s deleted from event %s",marketId,event.id),
                                 marketOperation
                         );
                     } else {
-                        // TODO: send message to topic
-                        marketChangeLogger.log(
+                        logChanges(
                                 String.format("[FAILED] - Market %s does not exist",marketId),
                                 marketOperation
                         );
                     }
                 } else {
                     String eventId = marketOperation.marketRequest.eventDTO.id;
-                    // TODO: send message to topic
-                    marketChangeLogger.log(
+                    logChanges(
                             String.format("[FAILED] - Event %s does not exist",eventId),
                             marketOperation
                     );
