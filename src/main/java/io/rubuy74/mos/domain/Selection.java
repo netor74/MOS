@@ -1,21 +1,39 @@
 package io.rubuy74.mos.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
+import java.util.Map;
+
+@Entity
 public class Selection {
+
+    @Id
     @JsonProperty
-    String id;
+    public String id;
 
     @JsonProperty
-    String name;
+    public String name;
 
     @JsonProperty
-    Double odd;
+    public Double odd;
+
+    public static Selection fromJson(Map<String,Object> rawPayload) {
+        String id = (String) rawPayload.get("id");
+        String name = (String) rawPayload.get("name");
+        Double odd = (Double) rawPayload.get("odd");
+        return new Selection(id, name, odd);
+    }
 
     public Selection(String id, String name, Double odd) {
         this.id = id;
         this.name = name;
         this.odd = odd;
+    }
+
+    public Selection() {
+
     }
 
     @Override

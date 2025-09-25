@@ -1,28 +1,39 @@
 package io.rubuy74.mos.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Entity
 public class Event {
+
+    @Id
     @JsonProperty
-    String id;
+    public String id;
 
     @JsonProperty
-    String name;
+    public String name;
 
     @JsonProperty
-    String date;
+    public String date;
 
     @JsonProperty
-    List<Market> markets;
+    @OneToMany(cascade = CascadeType.ALL)
+    public List<Market> markets;
 
     public Event(String id, String name, String date) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.markets = List.of();
+    }
+
+
+    public Event() {
+
     }
 
     @Override
