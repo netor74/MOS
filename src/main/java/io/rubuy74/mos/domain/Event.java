@@ -3,9 +3,7 @@ package io.rubuy74.mos.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 public class Event {
@@ -21,14 +19,13 @@ public class Event {
     public String date;
 
     @JsonProperty
-    @OneToMany(cascade = CascadeType.ALL)
-    public List<Market> markets;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<Market> markets = new java.util.ArrayList<>();
 
     public Event(String id, String name, String date) {
         this.id = id;
         this.name = name;
         this.date = date;
-        this.markets = List.of();
     }
 
 
