@@ -1,6 +1,8 @@
-package io.rubuy74.mos.domain;
+package io.rubuy74.mos.domain.http;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.rubuy74.mos.domain.Selection;
+import io.rubuy74.mos.domain.event.EventDTO;
 
 import java.sql.Timestamp;
 import java.util.List;

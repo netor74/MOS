@@ -2,8 +2,13 @@ package io.rubuy74.mos.application;
 
 import io.rubuy74.mos.adapter.out.database.SelectionService;
 import io.rubuy74.mos.domain.*;
+import io.rubuy74.mos.domain.event.Event;
+import io.rubuy74.mos.domain.event.EventDTO;
+import io.rubuy74.mos.domain.http.ResultType;
+import io.rubuy74.mos.domain.market.Market;
+import io.rubuy74.mos.domain.market.MarketOperation;
+import io.rubuy74.mos.domain.http.MarketOperationResult;
 import io.rubuy74.mos.port.in.MarketChangeHandler;
-import io.rubuy74.mos.port.out.EventRepository;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
 import io.rubuy74.mos.adapter.out.database.EventService;
 import jakarta.transaction.Transactional;
@@ -12,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

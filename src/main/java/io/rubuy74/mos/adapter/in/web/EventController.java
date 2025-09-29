@@ -1,7 +1,7 @@
 package io.rubuy74.mos.adapter.in.web;
 
 import io.rubuy74.mos.application.MarketListProcessor;
-import io.rubuy74.mos.domain.Event;
+import io.rubuy74.mos.domain.event.Event;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

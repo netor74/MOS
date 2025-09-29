@@ -1,7 +1,7 @@
 package io.rubuy74.mos.adapter.in.messaging;
 
 import io.rubuy74.mos.port.in.MarketChangeHandler;
-import io.rubuy74.mos.domain.MarketOperation;
+import io.rubuy74.mos.domain.market.MarketOperation;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
