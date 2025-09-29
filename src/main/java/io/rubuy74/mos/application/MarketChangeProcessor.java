@@ -1,52 +1,53 @@
 package io.rubuy74.mos.application;
 
+import io.rubuy74.mos.adapter.out.database.SelectionService;
 import io.rubuy74.mos.domain.*;
 import io.rubuy74.mos.port.in.MarketChangeHandler;
-import io.rubuy74.mos.port.out.MarketChangeLogger;
+import io.rubuy74.mos.port.out.EventRepository;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
 import io.rubuy74.mos.adapter.out.database.EventService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class MarketChangeProcessor implements MarketChangeHandler {
 
-    private final MarketChangeLogger marketChangeLogger;
     private final MarketChangePublisher marketChangePublisher;
     private final EventService eventService;
+    private final SelectionService selectionService;
+    private static final Logger logger = LoggerFactory.getLogger(MarketChangeProcessor.class);
 
     @Autowired
     public MarketChangeProcessor(
-            MarketChangeLogger marketChangeLogger,
             MarketChangePublisher marketChangePublisher,
-            EventService eventService) {
-        this.marketChangeLogger = marketChangeLogger;
+            EventService eventService,
+            SelectionService selectionService) {
         this.marketChangePublisher = marketChangePublisher;
         this.eventService = eventService;
+        this.selectionService = selectionService;
     }
 
 
     private Market createMarket(MarketOperation marketOperation) {
         String marketId = marketOperation.marketRequest.marketId;
         String marketName = marketOperation.marketRequest.marketName;
-        List<Selection> marketSelections = marketOperation.marketRequest.selections;
+        List<Selection> detachedSelections = marketOperation.marketRequest.selections;
+        List<Selection> marketSelections = selectionService.getManagedSelections(detachedSelections);
 
         return new Market(marketId,marketName,marketSelections);
     }
 
-    private void logChanges(String message, MarketOperation marketOperation) {
-        marketChangeLogger.log(
-                message,
-                marketOperation
-        );
-        marketChangePublisher.publish(
-                message,
-                marketOperation
-        );
+    private void logChanges(ResultType resultType, String message, MarketOperation marketOperation) {
+        logger.info(message);
+        MarketOperationResult marketOperationResult = new MarketOperationResult(resultType,message,marketOperation);
+        marketChangePublisher.publish(marketOperationResult);
     }
 
     @Override
@@ -66,13 +67,15 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         eventService.updateEvent(event);
 
                         logChanges(
-                                String.format("[SUCCESS] - Added market to event %s",event.id),
+                                ResultType.SUCCESS,
+                                String.format("Added market %s to event %s",marketId,event.id),
                                 marketOperation
                         );
 
                     } else {
                         logChanges(
-                                String.format("[FAILED] - Market %s already exists",marketId),
+                                ResultType.FAILURE,
+                                String.format("Market %s already exists in event %s",marketId,event.id),
                                 marketOperation
                         );
                         return;
@@ -84,7 +87,8 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                     event.markets.add(newMarket);
 
                     logChanges(
-                            String.format("[SUCCESS] - Created new event %s with market %s", event.id, newMarket.id),
+                            ResultType.SUCCESS,
+                            String.format("Created new event %s with market %s", event.id, newMarket.id),
                             marketOperation
                     );
 
@@ -93,28 +97,42 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                 return;
             case EDIT:
                 if (optionalEvent.isPresent()) {
+
                     Event event = optionalEvent.get();
                     String marketId = marketOperation.marketRequest.marketId;
-                    List<String> marketIds = event.markets.stream().map(market -> market.id).toList();
-                    if(marketIds.contains(marketId)) {
+                    Optional<Market> existingMarketOptional = event.markets.stream()
+                            .filter(market -> market.id.equals(marketId))
+                            .findFirst();
+
+                    if(existingMarketOptional.isPresent()) {
+                        Market existingMarket = existingMarketOptional.get();
                         Market newMarket = createMarket(marketOperation);
-                        event.markets.add(newMarket);
+                        existingMarket.name = newMarket.name;
+                        existingMarket.selections = newMarket.selections;
+
+                        event.markets.forEach(market -> {
+                            logger.error("Market ID: {} - Selections Class: {}",
+                                    market.id, market.selections.getClass().getName());
+                        });
                         eventService.updateEvent(event);
 
                         logChanges(
-                                String.format("[SUCCESS] - Updated market %s on event %s",newMarket.id,event.id),
+                                ResultType.SUCCESS,
+                                String.format("Updated market %s on event %s",newMarket.id,event.id),
                                 marketOperation
                         );
                     } else {
                         logChanges(
-                                String.format("[FAILED] - Market %s does not exist",marketId),
+                                ResultType.FAILURE,
+                                String.format("Market %s does not exist in event %s",marketId,event.id),
                                 marketOperation
                         );
                     }
                 } else {
                     String eventId = marketOperation.marketRequest.eventDTO.id;
                     logChanges(
-                            String.format("[FAILED] - Event %s does not exist",eventId),
+                            ResultType.FAILURE,
+                            String.format("Event %s does not exist",eventId),
                             marketOperation
                     );
                 }
@@ -123,26 +141,33 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                 if (optionalEvent.isPresent()) {
                     Event event = optionalEvent.get();
                     String marketId = marketOperation.marketRequest.marketId;
-                    List<String> marketIds = event.markets.stream().map(market -> market.id).toList();
-                    if(marketIds.contains(marketId)) {
-                        Market market = createMarket(marketOperation);
+
+                    Optional<Market> existingMarketOptional = event.markets.stream()
+                            .filter(market -> market.id.equals(marketId))
+                            .findFirst();
+
+                    if(existingMarketOptional.isPresent()) {
+                        Market market = existingMarketOptional.get();
                         event.markets.remove(market);
                         eventService.updateEvent(event);
 
                         logChanges(
-                                String.format("[SUCCESS] - Market %s deleted from event %s",marketId,event.id),
+                                ResultType.SUCCESS,
+                                String.format("Market %s deleted from event %s",marketId,event.id),
                                 marketOperation
                         );
                     } else {
                         logChanges(
-                                String.format("[FAILED] - Market %s does not exist",marketId),
+                                ResultType.FAILURE,
+                                String.format("Market %s does not exist in event %s",marketId,event.id),
                                 marketOperation
                         );
                     }
                 } else {
                     String eventId = marketOperation.marketRequest.eventDTO.id;
                     logChanges(
-                            String.format("[FAILED] - Event %s does not exist",eventId),
+                            ResultType.FAILURE,
+                            String.format("Event %s does not exist",eventId),
                             marketOperation
                     );
                 }

@@ -16,13 +16,18 @@ public class Market {
     public String name;
 
     @JsonProperty
-    @OneToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(
+            name = "market_selections",
+            joinColumns = @JoinColumn(name = "market_id"),
+            inverseJoinColumns = @JoinColumn()
+    )
     public List<Selection> selections;
 
     public Market(String id, String name, List<Selection> selections) {
         this.id = id;
         this.name = name;
-        this.selections = selections;
+        this.selections = new java.util.ArrayList<>(selections);
     }
 
     public Market() {
