@@ -1,6 +1,9 @@
-package io.rubuy74.mos.domain;
+package io.rubuy74.mos.domain.market;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.rubuy74.mos.domain.http.MarketRequest;
+import io.rubuy74.mos.domain.Selection;
+import io.rubuy74.mos.domain.event.EventDTO;
 
 import java.util.LinkedHashMap;
 import java.util.List;

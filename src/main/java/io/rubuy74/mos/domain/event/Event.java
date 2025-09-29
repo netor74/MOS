@@ -1,6 +1,7 @@
-package io.rubuy74.mos.domain;
+package io.rubuy74.mos.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.rubuy74.mos.domain.market.Market;
 import jakarta.persistence.*;
 
 import java.util.List;

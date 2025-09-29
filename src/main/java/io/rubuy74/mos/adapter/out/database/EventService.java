@@ -1,6 +1,6 @@
 package io.rubuy74.mos.adapter.out.database;
 
-import io.rubuy74.mos.domain.Event;
+import io.rubuy74.mos.domain.event.Event;
 import io.rubuy74.mos.port.out.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

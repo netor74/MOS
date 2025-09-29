@@ -1,7 +1,7 @@
 package io.rubuy74.mos.adapter.out.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.rubuy74.mos.domain.MarketOperationResult;
+import io.rubuy74.mos.domain.http.MarketOperationResult;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
