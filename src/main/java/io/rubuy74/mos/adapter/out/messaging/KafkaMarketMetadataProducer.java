@@ -9,55 +9,56 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class KafkaMarketMetadataProducer implements MarketChangePublisher {
     private static final Logger logger = LoggerFactory.getLogger(KafkaMarketMetadataProducer.class);
-    private static final String topic = "market-change-status";
-    private static final ObjectMapper mapper = new ObjectMapper() ;
+    private static final String TOPIC = "market-change-status";
+    private final ObjectMapper mapper ;
+    private final KafkaTemplate<String,byte[]> kafkaTemplate;
 
-    private Properties getKafkaProperties() {
-        Properties properties = new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("acks", "1");
-        properties.put("retries", 3);
-        properties.put("key.serializer", StringSerializer.class.getName() );
-        properties.put("value.serializer", ByteArraySerializer.class.getName()  );
-        return properties;
+    public KafkaMarketMetadataProducer(ObjectMapper mapper, KafkaTemplate<String, byte[]> kafkaTemplate) {
+        this.mapper = mapper;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
-    public void publish(MarketOperationResult marketOperationResult) {
+    public void publish(MarketOperationResult marketOperation) {
+
         byte[] payload;
         try {
-            payload = mapper.writeValueAsBytes(marketOperationResult);
+            payload = mapper.writeValueAsBytes(marketOperation);
+
         } catch (Exception e) {
-            logger.error("Failed to serialize MarketOperation to JSON: {}", e.getMessage(), e);
+            logger.error("operation=serialize_market_operation_result, " +
+                    "msg=Failed to serialize MarketOperationResult to JSON, " +
+                    "error={}", e.getMessage(), e);
             return;
         }
 
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(getKafkaProperties());
-        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(
-                topic,
-                marketOperationResult.resultType().toString(),
-                payload
-        );
-
-        producer.send(producerRecord, (metadata, exception) -> {
-            if (exception != null) {
-                logger.error("Failed to send MarketOperation to Kafka", exception);
-            } else  {
-                logger.info(
-                        "Send record to market-changes-status: {} \n Status({}): {}",
-                        metadata,
-                        marketOperationResult.resultType(),
-                        marketOperationResult.message()
-                );
-            }
-
-        });
+        try {
+            CompletableFuture<SendResult<String,byte[]>> future= kafkaTemplate.send(TOPIC, payload);
+            future.whenComplete((result, e) -> {
+                if (e != null) {
+                    logger.error("operation=send_market_operation_result," +
+                            "msg=Failed to send MarketOperationResult message, " +
+                            "error:{}", e.getMessage(), e);
+                } else  {
+                    logger.info("operation=send_market_operation_result," +
+                            "msg=Sent MarketOperationResult to market-changes-status: " +
+                            "payload={}", marketOperation.toString());
+                }
+            });
+        } catch (Exception e) {
+            logger.error("operation=send_market_operation_result, " +
+                    "msg:Caught Exception while sending MarketOperationResult message, " +
+                    "error: {}", e.getMessage(), e);
+        }
     }
 }

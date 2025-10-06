@@ -19,14 +19,6 @@ public class EventDTO {
     @JsonFormat(pattern = "dd/MM/yyyy")
     public LocalDate date;
 
-    public static EventDTO fromJson(Map<String,Object> rawPayload) {
-        String id = (String) rawPayload.get("id");
-        String name = (String) rawPayload.get("name");
-        LocalDate date = (LocalDate) rawPayload.get("date");
-
-        return new EventDTO(id,name,date);
-    }
-
     public EventDTO() {}
 
     public EventDTO(Event event) {
