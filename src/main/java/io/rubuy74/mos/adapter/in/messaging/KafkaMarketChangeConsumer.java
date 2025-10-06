@@ -1,5 +1,6 @@
 package io.rubuy74.mos.adapter.in.messaging;
 
+import io.rubuy74.mos.converter.MarketOperationJSONConverter;
 import io.rubuy74.mos.port.in.MarketChangeHandler;
 import io.rubuy74.mos.domain.MarketOperation;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,7 +22,7 @@ public class KafkaMarketChangeConsumer {
 
     @KafkaListener(topics = topic,groupId = groupId)
     private void handleMessage(LinkedHashMap<String, Object> rawPayload) {
-        MarketOperation marketOperation = MarketOperation.fromJson(rawPayload);
+        MarketOperation marketOperation = MarketOperationJSONConverter.fromJson(rawPayload);
         marketChangeHandler.handle(marketOperation);
     }
 }

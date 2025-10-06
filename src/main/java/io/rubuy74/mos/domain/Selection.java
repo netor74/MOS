@@ -37,13 +37,6 @@ public class Selection {
         return odd;
     }
 
-    public static Selection fromJson(Map<String,Object> rawPayload) {
-        String id = (String) rawPayload.get("id");
-        String name = (String) rawPayload.get("name");
-        Double odd = (Double) rawPayload.get("odd");
-        return new Selection(id, name, odd);
-    }
-
     public Selection(String id, String name, Double odd) {
         this.id = id;
         this.name = name;
