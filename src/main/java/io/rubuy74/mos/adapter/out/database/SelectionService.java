@@ -21,7 +21,7 @@ public class SelectionService {
         return incomingSelections
                 .stream()
                 .map(incomingSelection -> {
-                    String selectionId = incomingSelection.id;
+                    String selectionId = incomingSelection.getId();
                     return selectionRepository.findById(selectionId)
                             .orElseGet(() -> {
                                 logger.info("No selection found with id {}", selectionId);

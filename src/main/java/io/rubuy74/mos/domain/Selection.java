@@ -1,6 +1,7 @@
 package io.rubuy74.mos.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -8,16 +9,33 @@ import java.util.Map;
 
 @Entity
 public class Selection {
-
     @Id
     @JsonProperty
-    public String id;
+    private String id;
 
     @JsonProperty
-    public String name;
+    private String name;
 
     @JsonProperty
-    public Double odd;
+    private Double odd;
+
+    public Selection() {}
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public Double getOdd() {
+        return odd;
+    }
 
     public static Selection fromJson(Map<String,Object> rawPayload) {
         String id = (String) rawPayload.get("id");
@@ -32,16 +50,12 @@ public class Selection {
         this.odd = odd;
     }
 
-    public Selection() {
-
-    }
-
     @Override
     public String toString() {
-        return "Selection{" +
-                "id:" + id
-                + ", name:" + name
-                + ", odd:" + odd
-                ;
+        return MoreObjects.toStringHelper(this.getClass())
+                .add("id",id)
+                .add("name",name)
+                .add("odd",odd)
+                .toString();
     }
 }

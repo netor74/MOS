@@ -10,10 +10,10 @@ public class Market {
 
     @JsonProperty
     @Id
-    public String id;
+    private String id;
 
     @JsonProperty
-    public String name;
+    private String name;
 
     @JsonProperty
     @ManyToMany
@@ -23,6 +23,22 @@ public class Market {
             inverseJoinColumns = @JoinColumn()
     )
     public List<Selection> selections;
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public List<Selection> getSelections() {
+        return selections;
+    }
 
     public Market(String id, String name, List<Selection> selections) {
         this.id = id;

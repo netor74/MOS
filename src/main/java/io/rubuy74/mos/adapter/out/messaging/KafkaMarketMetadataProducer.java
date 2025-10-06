@@ -1,7 +1,7 @@
 package io.rubuy74.mos.adapter.out.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.rubuy74.mos.domain.MarketOperationResult;
+import io.rubuy74.mos.domain.database.MarketOperationResult;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -42,7 +42,7 @@ public class KafkaMarketMetadataProducer implements MarketChangePublisher {
         KafkaProducer<String, byte[]> producer = new KafkaProducer<>(getKafkaProperties());
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(
                 topic,
-                marketOperationResult.getResultType().toString(),
+                marketOperationResult.resultType().toString(),
                 payload
         );
 
@@ -53,8 +53,8 @@ public class KafkaMarketMetadataProducer implements MarketChangePublisher {
                 logger.info(
                         "Send record to market-changes-status: {} \n Status({}): {}",
                         metadata,
-                        marketOperationResult.getResultType(),
-                        marketOperationResult.getMessage()
+                        marketOperationResult.resultType(),
+                        marketOperationResult.message()
                 );
             }
 

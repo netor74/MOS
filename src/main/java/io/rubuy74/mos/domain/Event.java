@@ -1,44 +1,61 @@
 package io.rubuy74.mos.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import com.google.common.base.MoreObjects;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 public class Event {
-
+    @JsonProperty
     @Id
-    @JsonProperty
-    public String id;
+    private String id;
 
     @JsonProperty
-    public String name;
+    private String name;
 
     @JsonProperty
-    public String date;
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate date;
 
     @JsonProperty
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<Market> markets = new java.util.ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    private final List<Market> markets = new java.util.ArrayList<>();
 
-    public Event(String id, String name, String date) {
+
+    public String getId() {
+        return id;
+    }
+    public String getName() {
+        return name;
+    }
+    public LocalDate getDate() {
+        return date;
+    }
+    public List<Market> getMarkets() {
+        return markets;
+    }
+
+    public Event(String id, String name, LocalDate date) {
         this.id = id;
         this.name = name;
         this.date = date;
     }
-
-
-    public Event() {
-
-    }
+    public Event() {}
 
     @Override
     public String toString() {
-        return "Event{"
-                + "id='" + id + '\''
-                + ", name='" + name + '\''
-                + ", date=" + date
-                + ", markets=" + markets;
+        return MoreObjects.toStringHelper(this.getClass())
+                .add("id",id)
+                .add("name",name)
+                .add("date",date)
+                .add("market",markets)
+                .toString();
     }
 }

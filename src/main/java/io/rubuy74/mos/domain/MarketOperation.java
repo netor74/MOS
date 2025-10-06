@@ -1,6 +1,10 @@
 package io.rubuy74.mos.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
+import io.rubuy74.mos.domain.database.MarketRequest;
+import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.dto.EventDTO;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,9 +13,22 @@ import java.util.Map;
 
 public class MarketOperation {
     @JsonProperty
-    public MarketRequest marketRequest;
+    private MarketRequest marketRequest;
     @JsonProperty
-    public OperationType operationType;
+    private OperationType operationType;
+
+    public MarketRequest getMarketRequest() {
+        return marketRequest;
+    }
+    public void setMarketRequest(MarketRequest marketRequest) {
+        this.marketRequest = marketRequest;
+    }
+    public OperationType getOperationType() {
+        return operationType;
+    }
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
+    }
 
     @SuppressWarnings("unchecked")
     public static MarketOperation fromJson(LinkedHashMap<String, Object> rawPayload) {
@@ -47,4 +64,10 @@ public class MarketOperation {
         this.operationType = operationType;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this.getClass())
+                .add("marketRequest", marketRequest)
+                .add("operationType", operationType).toString();
+    }
 }
