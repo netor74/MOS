@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class EventDTOJSONConverter {
             return null;
         }
 
-        List<String> attributeList = List.of("event", "name", "date");
+        List<String> attributeList = List.of("name", "date");
         List<String> errorMessages = ValidatorUtils.checkAttributeList(rawPayload,attributeList);
         if(!errorMessages.isEmpty()) {
             errorMessages.forEach((errorMessage) -> {
@@ -29,7 +30,8 @@ public class EventDTOJSONConverter {
 
         String id = (String) rawPayload.get("id");
         String name = (String) rawPayload.get("name");
-        LocalDate date = LocalDate.parse((String) rawPayload.get("date"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate date = LocalDate.parse((String) rawPayload.get("date"), formatter);
 
         return new EventDTO(id,name,date);
     }
