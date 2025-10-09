@@ -2,15 +2,9 @@ package io.rubuy74.mos.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import io.rubuy74.mos.converter.SelectionJSONConverter;
 import io.rubuy74.mos.domain.database.MarketRequest;
 import io.rubuy74.mos.domain.database.OperationType;
-import io.rubuy74.mos.dto.EventDTO;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import io.rubuy74.mos.utils.ValidatorUtils;
 
 public class MarketOperation {
     @JsonProperty
@@ -32,10 +26,9 @@ public class MarketOperation {
     }
 
     public MarketOperation() {}
-
-    public MarketOperation(
-            @JsonProperty("marketRequest") MarketRequest marketRequest,
-            @JsonProperty("operationType") OperationType operationType) {
+    public MarketOperation(MarketRequest marketRequest, OperationType operationType) {
+        ValidatorUtils.checkArgument(marketRequest == null,"Market Request is null","create_market_operation");
+        ValidatorUtils.checkArgument(operationType == null,"OperationType is null","create_market_operation");
         this.marketRequest = marketRequest;
         this.operationType = operationType;
     }

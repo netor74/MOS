@@ -19,7 +19,7 @@ public class MarketRequest {
     public EventDTO eventDTO;
 
     @JsonProperty
-    Timestamp timestamp;
+    public Timestamp timestamp;
 
     @JsonProperty
     public List<Selection> selections;

@@ -5,18 +5,25 @@ import java.util.List;
 import java.util.Map;
 
 public class ValidatorUtils {
-
-
-    public static List<String> checkAttributeList(
+    public static void checkAttributeList(
             Map<String,Object> rawPayload,
             List<String> attributeList
     ) {
-        List<String> messages = new ArrayList<>();
+        List<String> errorMessages = new ArrayList<>();
         attributeList.forEach(attribute -> {
             if(!rawPayload.containsKey(attribute)) {
-                messages.add("attribute '" + attribute + "' doesn't exist");
+                errorMessages.add("attribute '" + attribute + "' doesn't exist");
             }
         });
-        return messages;
+
+        if(!errorMessages.isEmpty()) {
+            throw new IllegalArgumentException(errorMessages.toString());
+        }
+    }
+
+    public static void checkArgument(boolean expression, String errorMessage, String operation) {
+        if (expression) {
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 }
