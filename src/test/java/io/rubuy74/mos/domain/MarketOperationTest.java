@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MarketOperationTest {
     private static final String EVENT_ID = "e1";
     private static final String EVENT_NAME = "Match";
-    private static final LocalDate EVENT_DATE = LocalDate.parse("2025-12-01");
+    private static final long EVENT_DATE = LocalDate.parse("2025-12-01").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
     private static final String MARKET_ID = "m1";
     private static final String MARKET_NAME = "Market 1";
 

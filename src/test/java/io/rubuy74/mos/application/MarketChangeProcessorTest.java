@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +39,7 @@ class MarketChangeProcessorTest {
     }
 
     private MarketOperation buildOperation(OperationType type, String eventId, String marketId, String marketName, List<Selection> selections) {
-        EventDTO eventDTO = new EventDTO(eventId, "Event Name", LocalDate.parse("2025-10-06"));
+        EventDTO eventDTO = new EventDTO(eventId, "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         MarketRequest request = new MarketRequest(marketId, marketName, eventDTO, selections);
         return new MarketOperation(request, type);
     }
@@ -64,7 +65,7 @@ class MarketChangeProcessorTest {
 
     @Test
     void add_addsMarketToExistingEventWhenNotPresent() {
-        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06"));
+        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
         Selection s = new Selection("s1", "Sel 1", 1.5);
         when(selectionService.getManagedSelections(List.of(s))).thenReturn(List.of(s));
@@ -83,7 +84,7 @@ class MarketChangeProcessorTest {
         Selection s = new Selection("s1", "Sel 1", 1.5);
         Selection s2 = new Selection("s2", "Sel 2", 2.5);
         Market market = new Market("m1", "Old Name", List.of(s));
-        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06"));
+        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         existing.getMarkets().add(market);
         when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
         when(selectionService.getManagedSelections(List.of(s2))).thenReturn(List.of(s2));
@@ -102,7 +103,7 @@ class MarketChangeProcessorTest {
     void delete_removesExistingMarket() {
         Selection s = new Selection("s1", "Sel 1", 1.5);
         Market market = new Market("m1", "Market 1", List.of(s));
-        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06"));
+        Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         existing.getMarkets().add(market);
         when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
 

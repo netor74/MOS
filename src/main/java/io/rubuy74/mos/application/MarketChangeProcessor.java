@@ -54,7 +54,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
     @Override
     @Transactional
     public void handle(MarketOperation marketOperation) {
-        Optional<Event> optionalEvent = eventService.getEvent(marketOperation.getMarketRequest().eventDTO.id);
+        Optional<Event> optionalEvent = eventService.getEvent(marketOperation.getMarketRequest().eventDTO.getId());
         switch (marketOperation.getOperationType()) {
             case ADD:
                 if (optionalEvent.isPresent()) {
@@ -83,7 +83,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                     }
                 } else {
                     EventDTO eventDTO = marketOperation.getMarketRequest().eventDTO;
-                    Event event = new Event(eventDTO.id,eventDTO.name,eventDTO.date);
+                    Event event = new Event(eventDTO.getId(), eventDTO.getName(),eventDTO.getEpochMilliseconds());
                     Market newMarket = createMarket(marketOperation);
                     event.getMarkets().add(newMarket);
 
@@ -130,7 +130,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         );
                     }
                 } else {
-                    String eventId = marketOperation.getMarketRequest().eventDTO.id;
+                    String eventId = marketOperation.getMarketRequest().eventDTO.getId();
                     logChanges(
                             ResultType.FAILURE,
                             String.format("Event %s does not exist",eventId),
@@ -165,7 +165,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         );
                     }
                 } else {
-                    String eventId = marketOperation.getMarketRequest().eventDTO.id;
+                    String eventId = marketOperation.getMarketRequest().eventDTO.getId();
                     logChanges(
                             ResultType.FAILURE,
                             String.format("Event %s does not exist",eventId),

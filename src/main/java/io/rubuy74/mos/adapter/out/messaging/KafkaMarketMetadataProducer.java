@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaMarketMetadataProducer implements MarketChangePublisher {
     private static final Logger logger = LoggerFactory.getLogger(KafkaMarketMetadataProducer.class);
     private static final String TOPIC = "market-change-status";
-    private final ObjectMapper mapper ;
+    private final ObjectMapper mapper;
     private final KafkaTemplate<String,byte[]> kafkaTemplate;
 
     public KafkaMarketMetadataProducer(ObjectMapper mapper, KafkaTemplate<String, byte[]> kafkaTemplate) {
@@ -43,18 +43,18 @@ public class KafkaMarketMetadataProducer implements MarketChangePublisher {
         }
 
         try {
-            CompletableFuture<SendResult<String,byte[]>> future= kafkaTemplate.send(TOPIC, payload);
-            future.whenComplete((result, e) -> {
-                if (e != null) {
-                    logger.error("operation=send_market_operation_result," +
-                            "msg=Failed to send MarketOperationResult message, " +
-                            "error:{}", e.getMessage(), e);
-                } else  {
-                    logger.info("operation=send_market_operation_result," +
-                            "msg=Sent MarketOperationResult to market-changes-status: " +
-                            "payload={}", marketOperation.toString());
-                }
-            });
+            kafkaTemplate.send(TOPIC, payload)
+                .whenComplete((result, e) -> {
+                    if (e != null) {
+                        logger.error("operation=send_market_operation_result," +
+                                "msg=Failed to send MarketOperationResult message, " +
+                                "error:{}", e.getMessage(), e);
+                    } else  {
+                        logger.info("operation=send_market_operation_result," +
+                                "msg=Sent MarketOperationResult to market-changes-status: " +
+                                "payload={}", marketOperation.toString());
+                    }
+                });
         } catch (Exception e) {
             logger.error("operation=send_market_operation_result, " +
                     "msg:Caught Exception while sending MarketOperationResult message, " +

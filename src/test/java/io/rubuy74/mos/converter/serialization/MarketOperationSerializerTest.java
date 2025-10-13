@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InvalidObjectException;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ class MarketOperationSerializerTest {
 
     @Test
     void serialize_ShouldReturnBytes_WhenValidObjectProvided() throws Exception {
-        EventDTO eventDTO = new EventDTO("e1", "Game A vs Game B", LocalDate.parse("2026-11-20"));
+        EventDTO eventDTO = new EventDTO("e1", "Game A vs Game B", LocalDate.parse("2026-11-20").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         List<Selection> selections = List.of(
                 new Selection("s1", "Team A", 1.8),
                 new Selection("s2", "Team B", 2.0)

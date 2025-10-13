@@ -1,23 +1,21 @@
 package io.rubuy74.mos.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import io.rubuy74.mos.domain.Event;
 
-import java.time.LocalDate;
-import java.util.Map;
-
 public class EventDTO {
-    @JsonProperty
-    public String id;
 
     @JsonProperty
-    public String name;
+    private String id;
 
     @JsonProperty
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    public LocalDate date;
+    private String name;
+
+    @JsonProperty("date")
+    private long epochMilliseconds;
+
+    public EventDTO() {}
 
     public String getId() {
         return id;
@@ -32,22 +30,20 @@ public class EventDTO {
         this.name = name;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public long getEpochMilliseconds() {
+        return epochMilliseconds;
     }
-
-    public EventDTO() {}
 
     public EventDTO(Event event) {
         this.id = event.getId();
         this.name = event.getName();
-        this.date = event.getDate();
+        this.epochMilliseconds = event.getDate();
     }
 
-    public EventDTO(String id, String name, LocalDate date) {
+    public EventDTO(String id, String name, long epochMilliseconds) {
         this.id = id;
         this.name = name;
-        this.date = date;
+        this.epochMilliseconds= epochMilliseconds;
     }
 
     @Override
@@ -55,7 +51,8 @@ public class EventDTO {
         return MoreObjects.toStringHelper(this.getClass())
                 .add("id",id)
                 .add("name", name)
-                .add("date",date)
+                .add("date",epochMilliseconds)
                 .toString();
     }
+
 }

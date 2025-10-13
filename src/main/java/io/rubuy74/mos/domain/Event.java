@@ -12,10 +12,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Entity
 public class Event {
+
+    private static final ZoneId zoneId = ZoneOffset.UTC;
+
     @JsonProperty
     @Id
     private String id;
@@ -24,9 +29,7 @@ public class Event {
     private String name;
 
     @JsonProperty
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate date;
+    private long date;
 
     @JsonProperty
     @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
@@ -39,7 +42,7 @@ public class Event {
     public String getName() {
         return name;
     }
-    public LocalDate getDate() {
+    public long getDate() {
         return date;
     }
     public List<Market> getMarkets() {
@@ -48,10 +51,10 @@ public class Event {
 
     public Event() {}
 
-    public Event(String id, String name, LocalDate date) {
+    public Event(String id, String name, long date) {
         ValidatorUtils.checkArgument(id == null,"Event id is null","create_event");
         ValidatorUtils.checkArgument(name == null,"Event name is null","create_event");
-        ValidatorUtils.checkArgument(date == null,"Event date is null","create_event");
+        ValidatorUtils.checkArgument(date <= 0,"Event date is null","create_event");
         ValidatorUtils.checkArgument(id.isBlank(),   "Event id is empty","create_event");
         ValidatorUtils.checkArgument(name.isBlank(), "Event name is empty","create_event");
         this.id = id;
