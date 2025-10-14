@@ -15,8 +15,6 @@ public class EventDTO {
     @JsonProperty("date")
     private long epochMilliseconds;
 
-    public EventDTO() {}
-
     public String getId() {
         return id;
     }

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static io.rubuy74.mos.utils.MarketCreator.createMarket;
+
 @Component
 public class MarketChangeProcessor implements MarketChangeHandler {
 
@@ -37,141 +39,89 @@ public class MarketChangeProcessor implements MarketChangeHandler {
     }
 
 
-    private Market createMarket(MarketOperation marketOperation) {
-        String marketId = marketOperation.getMarketRequest().getMarketId();
-        String marketName = marketOperation.getMarketRequest().getMarketName();
-        List<Selection> detachedSelections = marketOperation.getMarketRequest().getSelections();
-        List<Selection> marketSelections = selectionService.getManagedSelections(detachedSelections);
-
-        return new Market(marketId,marketName,marketSelections);
-    }
-
     private void logChanges(ResultType resultType, String message, MarketOperation marketOperation) {
         logger.info(message);
         MarketOperationResult marketOperationResult = new MarketOperationResult(resultType,message,marketOperation);
         marketChangePublisher.publish(marketOperationResult);
     }
 
+
     @Override
     @Transactional
     public void handle(MarketOperation marketOperation) {
+        OperationType operationType = marketOperation.getOperationType();
         String eventID = marketOperation.getMarketRequest().getEventDTO().getId();
         Optional<Event> optionalEvent = eventService.getEventById(eventID);
         
-        if(optionalEvent.isEmpty() && !marketOperation.getOperationType().equals(OperationType.ADD)) {
-            logChanges(
-                    ResultType.FAILURE,
-                    String.format("Event %s does not exist",eventID),
-                    marketOperation
-            );
+        if(optionalEvent.isEmpty()) {
+            if(marketOperation.getOperationType().equals(OperationType.ADD)) {
+                EventDTO eventDTO = marketOperation.getMarketRequest().getEventDTO();
+                String marketId = marketOperation.getMarketRequest().getMarketId();
+                eventService.addEvent(selectionService,marketOperation,eventDTO);
+                logChanges(
+                        ResultType.SUCCESS,
+                        String.format("Created new event %s with market %s", eventDTO.getId(),marketId),
+                        marketOperation
+                );
+            } else {
+                logChanges(
+                        ResultType.FAILURE,
+                        String.format("Event %s does not exist",eventID),
+                        marketOperation
+                );
+            }
+            return;
         }
-        if(optionalEvent.isPresent()) {
 
-        }
-        switch (marketOperation.getOperationType()) {
-            case ADD:
-                if (optionalEvent.isPresent()) {
-                    Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().getMarketId();
-                    List<String> marketIds = event.getMarkets().stream().map(Market::getId).toList();
+        Event event = optionalEvent.get();
+        String marketId = marketOperation.getMarketRequest().getMarketId();
+        List<String> marketIds = event.getMarkets().stream().map(Market::getId).toList();
 
-                    if(!marketIds.contains(marketId)) {
-                        Market newMarket = createMarket(marketOperation);
-                        event.getMarkets().add(newMarket);
-                        eventService.updateEvent(event);
+        if(operationType.equals(OperationType.ADD)) {
+            if(!marketIds.contains(marketId)) {
+                eventService.addMarket(selectionService,marketOperation, event);
+                logChanges(
+                        ResultType.SUCCESS,
+                        String.format("Added market %s to event %s",marketId, event.getId()),
+                        marketOperation
+                );
+            } else {
+                logChanges(
+                        ResultType.FAILURE,
+                        String.format("Market %s already exists in event %s",marketId, event.getId()),
+                        marketOperation
+                );
+            }
+        } else {
+            Optional<Market> existingMarketOptional = event.getMarkets().stream()
+                    .filter(market -> market.getId().equals(marketId))
+                    .findFirst();
 
-                        logChanges(
-                                ResultType.SUCCESS,
-                                String.format("Added market %s to event %s",marketId, event.getId()),
-                                marketOperation
-                        );
-
-                    } else {
-                        logChanges(
-                                ResultType.FAILURE,
-                                String.format("Market %s already exists in event %s",marketId, event.getId()),
-                                marketOperation
-                        );
-                        return;
-                    }
-                } else {
-                    EventDTO eventDTO = marketOperation.getMarketRequest().getEventDTO();
-                    Event event = new Event(eventDTO.getId(), eventDTO.getName(),eventDTO.getEpochMilliseconds());
-                    Market newMarket = createMarket(marketOperation);
-                    event.getMarkets().add(newMarket);
-
+            if(existingMarketOptional.isPresent()) {
+                Market existingMarket = existingMarketOptional.get();
+                if(operationType.equals(OperationType.DELETE)) {
+                    eventService.deleteMarket(event,existingMarket);
                     logChanges(
                             ResultType.SUCCESS,
-                            String.format("Created new event %s with market %s", event.getId(), newMarket.getId()),
+                            String.format("Market %s deleted from event %s",marketId, event.getId()),
                             marketOperation
                     );
-
-                    eventService.createEvent(event);
+                } else if (operationType.equals(OperationType.EDIT)) {
+                    Market newMarket = createMarket(selectionService,marketOperation);
+                    eventService.updateMarket(event,existingMarket,newMarket);
+                    logChanges(
+                            ResultType.SUCCESS,
+                            String.format("Updated market %s on event %s", newMarket.getId(), event.getId()),
+                            marketOperation
+                    );
                 }
-                return;
-            case EDIT:
-                if (optionalEvent.isPresent()) {
-                    Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().getMarketId();
-                    Optional<Market> existingMarketOptional = event.getMarkets().stream()
-                            .filter(market -> market.getId().equals(marketId))
-                            .findFirst();
-
-                    if(existingMarketOptional.isPresent()) {
-                        Market existingMarket = existingMarketOptional.get();
-                        Market newMarket = createMarket(marketOperation);
-                        existingMarket.setName(newMarket.getName());
-                        existingMarket.selections = newMarket.selections;
-
-                        event.getMarkets().forEach(market -> {
-                            logger.error("Market ID: {} - Selections Class: {}",
-                                    market.getId(), market.selections.getClass().getName());
-                        });
-                        eventService.updateEvent(event);
-
-                        logChanges(
-                                ResultType.SUCCESS,
-                                String.format("Updated market %s on event %s", newMarket.getId(), event.getId()),
-                                marketOperation
-                        );
-                    } else {
-                        logChanges(
-                                ResultType.FAILURE,
-                                String.format("Market %s does not exist in event %s",marketId, event.getId()),
-                                marketOperation
-                        );
-                    }
-                }
-                return;
-            case DELETE:
-                if (optionalEvent.isPresent()) {
-                    Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().getMarketId();
-
-                    Optional<Market> existingMarketOptional = event.getMarkets().stream()
-                            .filter(market -> market.getId().equals(marketId))
-                            .findFirst();
-
-                    if(existingMarketOptional.isPresent()) {
-                        Market market = existingMarketOptional.get();
-                        event.getMarkets().remove(market);
-                        eventService.updateEvent(event);
-
-                        logChanges(
-                                ResultType.SUCCESS,
-                                String.format("Market %s deleted from event %s",marketId, event.getId()),
-                                marketOperation
-                        );
-                    } else {
-                        logChanges(
-                                ResultType.FAILURE,
-                                String.format("Market %s does not exist in event %s",marketId, event.getId()),
-                                marketOperation
-                        );
-                    }
-                }
-                return;
-            default:
+            } else {
+                logChanges(
+                        ResultType.FAILURE,
+                        String.format("Market %s does not exist in event %s",marketId, event.getId()),
+                        marketOperation
+                );
+            }
         }
     }
 }
