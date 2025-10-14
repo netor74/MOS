@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.rubuy74.mos.domain.MarketOperation;
 import io.rubuy74.mos.domain.Selection;
-import io.rubuy74.mos.domain.database.MarketRequest;
-import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.domain.internal.MarketRequest;
+import io.rubuy74.mos.domain.internal.OperationType;
 import io.rubuy74.mos.dto.EventDTO;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +39,8 @@ class MarketOperationSerializerTest {
         assertAll(
                 () -> assertThat(serializedBytes).isNotEmpty(),
                 () -> assertThat(deserializedObject.getOperationType()).isEqualTo(OperationType.ADD),
-                () -> assertThat(deserializedObject.getMarketRequest().marketId).isEqualTo("m1"),
-                () -> assertThat(deserializedObject.getMarketRequest().eventDTO.getName()).isEqualTo("Game A vs Game B")
+                () -> assertThat(deserializedObject.getMarketRequest().getMarketId()).isEqualTo("m1"),
+                () -> assertThat(deserializedObject.getMarketRequest().getEventDTO().getName()).isEqualTo("Game A vs Game B")
         );
     }
 

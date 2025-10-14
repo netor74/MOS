@@ -1,8 +1,8 @@
 package io.rubuy74.mos.converter.deserialization;
 
 import io.rubuy74.mos.domain.MarketOperation;
-import io.rubuy74.mos.domain.database.MarketRequest;
-import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.domain.internal.MarketRequest;
+import io.rubuy74.mos.domain.internal.OperationType;
 import io.rubuy74.mos.utils.ValidatorUtils;
 
 import java.util.LinkedHashMap;
@@ -15,9 +15,6 @@ public class MarketOperationDeserializer {
 
     @SuppressWarnings("unchecked")
     public static MarketOperation deserialize(LinkedHashMap<String, Object> rawPayload) {
-        MarketOperation marketOperation = new MarketOperation();
-        MarketRequest marketRequest = new MarketRequest();
-
         ValidatorUtils.checkArgument(
                 rawPayload == null,
                 "MarketOperation payload is null",
@@ -34,18 +31,16 @@ public class MarketOperationDeserializer {
 
 
         Map<String, Object> eventMap = (Map<String, Object>) marketRequestMap.get("event");
-
-        // add event to marketRequest
-        marketRequest.eventDTO = EventDTODeserializer.deserialize(eventMap);
-        marketRequest.marketId = (String)marketRequestMap.get("marketId");
-        marketRequest.marketName = (String)marketRequestMap.get("marketName");
-
         List<Map<String, Object>> selectionsMap = (List<Map<String, Object>>) marketRequestMap.get("selections");
 
-        // add selections to marketRequest
-        marketRequest.selections = selectionsMap.stream().map(SelectionDeserializer::deserialize).toList();
-        marketOperation.setMarketRequest(marketRequest);
-        marketOperation.setOperationType(OperationType.valueOf((String) rawPayload.get("operationType")));
-        return marketOperation;
+        MarketRequest marketRequest = new MarketRequest((String) marketRequestMap.get("marketId"),
+                (String) marketRequestMap.get("marketName"),
+                EventDTODeserializer.deserialize(eventMap),
+                selectionsMap.stream().map(SelectionDeserializer::deserialize).toList()
+        );
+
+        return new MarketOperation(marketRequest,
+                OperationType.valueOf((String) rawPayload.get("operationType"))
+        );
     }
 }

@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class EventDTODeserializer {
     private static final List<String> ATTRIBUTE_LIST = List.of("name", "date");
@@ -23,23 +24,31 @@ public class EventDTODeserializer {
         }
     }
 
-    private static void checkEventValidity(Map<String,Object> rawPayload) {
-        ValidatorUtils.checkArgument(
-                rawPayload == null,
-                "EventDTO payload is null",
-                "deserialize_event_dto");
-        ValidatorUtils.checkAttributeList(
-                rawPayload,
-                ATTRIBUTE_LIST);
-        ValidatorUtils.checkArgument(
-                !(checkDate((long) rawPayload.get("date"))),
-                "Event DTO Date is invalid",
-                "deserialize_event_dto"
-        );
+    private static Optional<IllegalArgumentException> checkEventValidity(Map<String,Object> rawPayload) {
+        try {
+            ValidatorUtils.checkArgument(
+                    rawPayload == null,
+                    "EventDTO payload is null",
+                    "deserialize_event_dto");
+            ValidatorUtils.checkAttributeList(
+                    rawPayload,
+                    ATTRIBUTE_LIST);
+            ValidatorUtils.checkArgument(
+                    !(checkDate((long) rawPayload.get("date"))),
+                    "Event DTO Date is invalid",
+                    "deserialize_event_dto"
+            );
+            return Optional.empty();
+        } catch (IllegalArgumentException e) {
+            return Optional.of(e);
+        }
     }
 
     public static EventDTO deserialize(Map<String,Object> rawPayload) {
-        checkEventValidity(rawPayload); // throws exception if not valid
+        Optional<IllegalArgumentException> InvalidDateError = checkEventValidity(rawPayload);
+        if (InvalidDateError.isPresent()) {
+            throw InvalidDateError.get();
+        }
 
         String id = (String) rawPayload.get("id");
         String name = (String) rawPayload.get("name");

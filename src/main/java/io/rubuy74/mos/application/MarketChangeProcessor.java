@@ -2,8 +2,9 @@ package io.rubuy74.mos.application;
 
 import io.rubuy74.mos.adapter.out.database.SelectionService;
 import io.rubuy74.mos.domain.*;
-import io.rubuy74.mos.domain.database.MarketOperationResult;
-import io.rubuy74.mos.domain.database.ResultType;
+import io.rubuy74.mos.domain.internal.MarketOperationResult;
+import io.rubuy74.mos.domain.internal.OperationType;
+import io.rubuy74.mos.domain.internal.ResultType;
 import io.rubuy74.mos.dto.EventDTO;
 import io.rubuy74.mos.port.in.MarketChangeHandler;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
@@ -37,9 +38,9 @@ public class MarketChangeProcessor implements MarketChangeHandler {
 
 
     private Market createMarket(MarketOperation marketOperation) {
-        String marketId = marketOperation.getMarketRequest().marketId;
-        String marketName = marketOperation.getMarketRequest().marketName;
-        List<Selection> detachedSelections = marketOperation.getMarketRequest().selections;
+        String marketId = marketOperation.getMarketRequest().getMarketId();
+        String marketName = marketOperation.getMarketRequest().getMarketName();
+        List<Selection> detachedSelections = marketOperation.getMarketRequest().getSelections();
         List<Selection> marketSelections = selectionService.getManagedSelections(detachedSelections);
 
         return new Market(marketId,marketName,marketSelections);
@@ -54,12 +55,24 @@ public class MarketChangeProcessor implements MarketChangeHandler {
     @Override
     @Transactional
     public void handle(MarketOperation marketOperation) {
-        Optional<Event> optionalEvent = eventService.getEvent(marketOperation.getMarketRequest().eventDTO.getId());
+        String eventID = marketOperation.getMarketRequest().getEventDTO().getId();
+        Optional<Event> optionalEvent = eventService.getEventById(eventID);
+        
+        if(optionalEvent.isEmpty() && !marketOperation.getOperationType().equals(OperationType.ADD)) {
+            logChanges(
+                    ResultType.FAILURE,
+                    String.format("Event %s does not exist",eventID),
+                    marketOperation
+            );
+        }
+        if(optionalEvent.isPresent()) {
+
+        }
         switch (marketOperation.getOperationType()) {
             case ADD:
                 if (optionalEvent.isPresent()) {
                     Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().marketId;
+                    String marketId = marketOperation.getMarketRequest().getMarketId();
                     List<String> marketIds = event.getMarkets().stream().map(Market::getId).toList();
 
                     if(!marketIds.contains(marketId)) {
@@ -82,7 +95,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                         return;
                     }
                 } else {
-                    EventDTO eventDTO = marketOperation.getMarketRequest().eventDTO;
+                    EventDTO eventDTO = marketOperation.getMarketRequest().getEventDTO();
                     Event event = new Event(eventDTO.getId(), eventDTO.getName(),eventDTO.getEpochMilliseconds());
                     Market newMarket = createMarket(marketOperation);
                     event.getMarkets().add(newMarket);
@@ -98,9 +111,8 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                 return;
             case EDIT:
                 if (optionalEvent.isPresent()) {
-
                     Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().marketId;
+                    String marketId = marketOperation.getMarketRequest().getMarketId();
                     Optional<Market> existingMarketOptional = event.getMarkets().stream()
                             .filter(market -> market.getId().equals(marketId))
                             .findFirst();
@@ -129,19 +141,12 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                                 marketOperation
                         );
                     }
-                } else {
-                    String eventId = marketOperation.getMarketRequest().eventDTO.getId();
-                    logChanges(
-                            ResultType.FAILURE,
-                            String.format("Event %s does not exist",eventId),
-                            marketOperation
-                    );
                 }
                 return;
             case DELETE:
                 if (optionalEvent.isPresent()) {
                     Event event = optionalEvent.get();
-                    String marketId = marketOperation.getMarketRequest().marketId;
+                    String marketId = marketOperation.getMarketRequest().getMarketId();
 
                     Optional<Market> existingMarketOptional = event.getMarkets().stream()
                             .filter(market -> market.getId().equals(marketId))
@@ -164,13 +169,6 @@ public class MarketChangeProcessor implements MarketChangeHandler {
                                 marketOperation
                         );
                     }
-                } else {
-                    String eventId = marketOperation.getMarketRequest().eventDTO.getId();
-                    logChanges(
-                            ResultType.FAILURE,
-                            String.format("Event %s does not exist",eventId),
-                            marketOperation
-                    );
                 }
                 return;
             default:

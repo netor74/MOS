@@ -1,6 +1,6 @@
 package io.rubuy74.mos.domain.http;
 
-import io.rubuy74.mos.domain.database.MarketRequest;
+import io.rubuy74.mos.domain.internal.MarketRequest;
 import io.rubuy74.mos.dto.EventDTO;
 import org.junit.jupiter.api.Test;
 
@@ -23,11 +23,11 @@ class MarketRequestTest {
         EventDTO eventDTO = new EventDTO(EVENT_ID, EVENT_NAME, EVENT_DATE);
         MarketRequest req = new MarketRequest(MARKET_ID, MARKET_NAME, eventDTO, new ArrayList<>());
         assertAll(
-            () -> assertThat(req.marketId).isEqualTo(MARKET_ID),
-            () -> assertThat(req.marketName).isEqualTo(MARKET_NAME),
-            () -> assertThat(req.eventDTO).isSameAs(eventDTO),
-            () -> assertThat(req.timestamp).isNotNull(),
-            () -> assertThat(req.selections).isNotNull()
+            () -> assertThat(req.getMarketId()).isEqualTo(MARKET_ID),
+            () -> assertThat(req.getMarketName()).isEqualTo(MARKET_NAME),
+            () -> assertThat(req.getEventDTO()).isSameAs(eventDTO),
+            () -> assertThat(req.getTimestamp()).isNotNull(),
+            () -> assertThat(req.getSelections()).isNotNull()
         );
     }
 }

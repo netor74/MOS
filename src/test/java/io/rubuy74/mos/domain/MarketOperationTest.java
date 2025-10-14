@@ -1,7 +1,7 @@
 package io.rubuy74.mos.domain;
 
-import io.rubuy74.mos.domain.database.MarketRequest;
-import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.domain.internal.MarketRequest;
+import io.rubuy74.mos.domain.internal.OperationType;
 import io.rubuy74.mos.dto.EventDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

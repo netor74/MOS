@@ -1,7 +1,7 @@
 package io.rubuy74.mos.converter.deserialization;
 
 import io.rubuy74.mos.domain.MarketOperation;
-import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.domain.internal.OperationType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,10 +44,10 @@ class MarketOperationDeserializerTest {
 
         assertAll(
                 () -> assertThat(result.getOperationType()).isEqualTo(OperationType.ADD),
-                () -> assertThat(result.getMarketRequest().marketId).isEqualTo("m1"),
-                () -> assertThat(result.getMarketRequest().marketName).isEqualTo("Market 1"),
-                () -> assertThat(result.getMarketRequest().eventDTO.getId()).isEqualTo("e1"),
-                () -> assertThat(result.getMarketRequest().selections).hasSize(1)
+                () -> assertThat(result.getMarketRequest().getMarketId()).isEqualTo("m1"),
+                () -> assertThat(result.getMarketRequest().getMarketName()).isEqualTo("Market 1"),
+                () -> assertThat(result.getMarketRequest().getEventDTO().getId()).isEqualTo("e1"),
+                () -> assertThat(result.getMarketRequest().getSelections()).hasSize(1)
         );
     }
 

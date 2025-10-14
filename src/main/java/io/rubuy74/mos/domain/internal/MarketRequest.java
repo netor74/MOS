@@ -1,4 +1,4 @@
-package io.rubuy74.mos.domain.database;
+package io.rubuy74.mos.domain.internal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
@@ -10,21 +10,36 @@ import java.util.List;
 
 public class MarketRequest {
     @JsonProperty
-    public String marketId;
+    private String marketId;
 
     @JsonProperty
-    public String marketName;
+    private String marketName;
 
     @JsonProperty("event")
-    public EventDTO eventDTO;
+    private EventDTO eventDTO;
 
     @JsonProperty
-    public Timestamp timestamp;
+    private Timestamp timestamp;
 
     @JsonProperty
-    public List<Selection> selections;
+    private List<Selection> selections;
 
-    public MarketRequest() {}
+    public String getMarketId() {
+        return marketId;
+    }
+    public String getMarketName() {
+        return marketName;
+    }
+    public EventDTO getEventDTO() {
+        return eventDTO;
+    }
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+    public List<Selection> getSelections() {
+        return selections;
+    }
+
     public MarketRequest(String marketId, String marketName,EventDTO eventDTO, List<Selection> selections) {
         this.marketId = marketId;
         this.marketName = marketName;

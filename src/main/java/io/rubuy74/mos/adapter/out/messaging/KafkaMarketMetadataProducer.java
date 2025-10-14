@@ -1,20 +1,12 @@
 package io.rubuy74.mos.adapter.out.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.rubuy74.mos.domain.database.MarketOperationResult;
+import io.rubuy74.mos.domain.internal.MarketOperationResult;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-
-import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 
 @Component
 public class KafkaMarketMetadataProducer implements MarketChangePublisher {

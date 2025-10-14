@@ -6,8 +6,8 @@ import io.rubuy74.mos.domain.Event;
 import io.rubuy74.mos.domain.Market;
 import io.rubuy74.mos.domain.MarketOperation;
 import io.rubuy74.mos.domain.Selection;
-import io.rubuy74.mos.domain.database.MarketRequest;
-import io.rubuy74.mos.domain.database.OperationType;
+import io.rubuy74.mos.domain.internal.MarketRequest;
+import io.rubuy74.mos.domain.internal.OperationType;
 import io.rubuy74.mos.dto.EventDTO;
 import io.rubuy74.mos.port.out.MarketChangePublisher;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class MarketChangeProcessorTest {
 
     @Test
     void add_createsEventWhenMissingAndPublishesSuccess() {
-        when(eventService.getEvent("e1")).thenReturn(Optional.empty());
+        when(eventService.getEventById("e1")).thenReturn(Optional.empty());
         Selection s = new Selection("s1", "Sel 1", 1.5);
         when(selectionService.getManagedSelections(List.of(s))).thenReturn(List.of(s));
 
@@ -66,7 +66,7 @@ class MarketChangeProcessorTest {
     @Test
     void add_addsMarketToExistingEventWhenNotPresent() {
         Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-        when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
+        when(eventService.getEventById("e1")).thenReturn(Optional.of(existing));
         Selection s = new Selection("s1", "Sel 1", 1.5);
         when(selectionService.getManagedSelections(List.of(s))).thenReturn(List.of(s));
 
@@ -86,7 +86,7 @@ class MarketChangeProcessorTest {
         Market market = new Market("m1", "Old Name", List.of(s));
         Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         existing.getMarkets().add(market);
-        when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
+        when(eventService.getEventById("e1")).thenReturn(Optional.of(existing));
         when(selectionService.getManagedSelections(List.of(s2))).thenReturn(List.of(s2));
 
         MarketOperation op = buildOperation(OperationType.EDIT, "e1", "m1", "New Name", List.of(s2));
@@ -105,7 +105,7 @@ class MarketChangeProcessorTest {
         Market market = new Market("m1", "Market 1", List.of(s));
         Event existing = new Event("e1", "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         existing.getMarkets().add(market);
-        when(eventService.getEvent("e1")).thenReturn(Optional.of(existing));
+        when(eventService.getEventById("e1")).thenReturn(Optional.of(existing));
 
         MarketOperation op = buildOperation(OperationType.DELETE, "e1", "m1", "Market 1", List.of());
         processor.handle(op);
