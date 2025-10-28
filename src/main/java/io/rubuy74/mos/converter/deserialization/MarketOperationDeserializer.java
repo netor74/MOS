@@ -39,7 +39,7 @@ public class MarketOperationDeserializer {
                 selectionsMap.stream().map(SelectionDeserializer::deserialize).toList()
         );
 
-        return new MarketOperation(marketRequest,
+        return new MarketOperation((String) rawPayload.get("requestId"), marketRequest,
                 OperationType.valueOf((String) rawPayload.get("operationType"))
         );
     }

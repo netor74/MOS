@@ -28,7 +28,7 @@ class MarketOperationTest {
     void constructor_ShouldSetFields_WhenValidArgsProvided() {
         EventDTO eventDTO = new EventDTO(EVENT_ID, EVENT_NAME, EVENT_DATE);
         MarketRequest req = new MarketRequest(MARKET_ID, MARKET_NAME, eventDTO, new ArrayList<>());
-        MarketOperation op = new MarketOperation(req, OperationType.ADD);
+        MarketOperation op = new MarketOperation("test-request-id", req, OperationType.ADD);
 
         assertAll(
             () -> assertThat(op.getMarketRequest()).isSameAs(req),
@@ -47,7 +47,7 @@ class MarketOperationTest {
     @ParameterizedTest
     @MethodSource("invalidConstructorArgs")
     void constructor_ShouldThrow_WhenAnyArgumentIsNull(MarketRequest req, OperationType op, String expectedMessage) {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new MarketOperation(req, op));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new MarketOperation("test-request-id", req, op));
         assertThat(thrown.getMessage()).isEqualTo(expectedMessage);
     }
 }

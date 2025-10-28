@@ -41,7 +41,7 @@ public class MarketChangeProcessor implements MarketChangeHandler {
 
     private void logChanges(ResultType resultType, String message, MarketOperation marketOperation) {
         logger.info(message);
-        MarketOperationResult marketOperationResult = new MarketOperationResult(resultType,message,marketOperation);
+        MarketOperationResult marketOperationResult = new MarketOperationResult(marketOperation.getRequestId(), resultType,message,marketOperation);
         marketChangePublisher.publish(marketOperationResult);
     }
 

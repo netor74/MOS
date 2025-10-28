@@ -41,7 +41,7 @@ class MarketChangeProcessorTest {
     private MarketOperation buildOperation(OperationType type, String eventId, String marketId, String marketName, List<Selection> selections) {
         EventDTO eventDTO = new EventDTO(eventId, "Event Name", LocalDate.parse("2025-10-06").atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         MarketRequest request = new MarketRequest(marketId, marketName, eventDTO, selections);
-        return new MarketOperation(request, type);
+        return new MarketOperation("test-request-id", request, type);
     }
 
     @Test
