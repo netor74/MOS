@@ -30,6 +30,8 @@ public class MarketOperation {
         this.operationType = operationType;
     }
 
+    public MarketOperation() {}
+
     public MarketOperation(String requestId, MarketRequest marketRequest, OperationType operationType) {
         ValidatorUtils.checkArgument(requestId == null || requestId.isBlank(),"Request ID is null or blank","create_market_operation");
         ValidatorUtils.checkArgument(marketRequest == null,"Market Request is null","create_market_operation");

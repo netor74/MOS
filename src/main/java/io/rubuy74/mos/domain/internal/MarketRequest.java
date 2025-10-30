@@ -40,6 +40,8 @@ public class MarketRequest {
         return selections;
     }
 
+    public MarketRequest() {}
+
     public MarketRequest(String marketId, String marketName,EventDTO eventDTO, List<Selection> selections) {
         this.marketId = marketId;
         this.marketName = marketName;

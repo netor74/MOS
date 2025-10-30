@@ -34,7 +34,7 @@ public class EventDTODeserializer {
                     rawPayload,
                     ATTRIBUTE_LIST);
             ValidatorUtils.checkArgument(
-                    !(checkDate((long) rawPayload.get("date"))),
+                    checkDate((long) rawPayload.get("date")),
                     "Event DTO Date is invalid",
                     "deserialize_event_dto"
             );

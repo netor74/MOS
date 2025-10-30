@@ -7,6 +7,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,6 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MarketOperationDeserializerTest {
+
+    private static final long EVENT_DATE = LocalDate
+                    .parse("2025-12-01")
+                    .atStartOfDay(ZoneOffset.UTC)
+                    .toInstant()
+                    .toEpochMilli();
 
     @Test
     void deserialize_ShouldReturnMarketOperation_WhenValidPayload() {
@@ -30,7 +38,7 @@ class MarketOperationDeserializerTest {
 
         eventMap.put("id", "e1");
         eventMap.put("name", "Event 1");
-        eventMap.put("date", "2026-01-01");
+        eventMap.put("date", EVENT_DATE);
 
         marketRequestMap.put("marketId", "m1");
         marketRequestMap.put("marketName", "Market 1");
@@ -39,6 +47,7 @@ class MarketOperationDeserializerTest {
 
         rawPayload.put("marketRequest", marketRequestMap);
         rawPayload.put("operationType", "ADD");
+        rawPayload.put("requestId", "123123123123");
 
         MarketOperation result = MarketOperationDeserializer.deserialize(rawPayload);
 
@@ -61,7 +70,7 @@ class MarketOperationDeserializerTest {
         selectionMap.put("odd", 1.5);
         eventMap.put("id", "e1");
         eventMap.put("name", "Event 1");
-        eventMap.put("date", "2026-01-01");
+        eventMap.put("date", EVENT_DATE);
         marketRequestMap.put("marketId", "m1");
         marketRequestMap.put("marketName", "Market 1");
         marketRequestMap.put("event", eventMap);
@@ -77,7 +86,7 @@ class MarketOperationDeserializerTest {
                 Arguments.of(new LinkedHashMap<>() {{
                     put("marketRequest", marketRequestMap);
                     put("operationType", "INVALID_OP");
-                }}, "No enum constant io.rubuy74.mos.domain.database.OperationType.INVALID_OP")
+                }}, "No enum constant io.rubuy74.mos.domain.internal.OperationType.INVALID_OP")
         );
     }
 

@@ -32,6 +32,8 @@ public class EventDTO {
         return epochMilliseconds;
     }
 
+    public EventDTO() {}
+
     public EventDTO(Event event) {
         this.id = event.getId();
         this.name = event.getName();
