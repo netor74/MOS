@@ -22,16 +22,11 @@ public class KafkaMarketMetadataProducer implements MarketChangePublisher {
 
     @Override
     public void publish(MarketOperationResult marketOperation) {
-
         byte[] payload;
         try {
             payload = mapper.writeValueAsBytes(marketOperation);
-
         } catch (Exception e) {
-            logger.error("operation=serialize_market_operation_result, " +
-                    "msg=Failed to serialize MarketOperationResult to JSON, " +
-                    "error={}", e.getMessage(), e);
-            return;
+            throw new IllegalArgumentException("Failed to serialize MarketOperationResult to JSON: " + e.getMessage(), e);
         }
 
         try {
